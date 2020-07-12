@@ -19,22 +19,16 @@ function() {
 	return function(model) {		
 	    var globalSendTaskName = '_' + model.get('trackingId') + '_sendHitTask';
 	    var originalSendHitTask = window[globalSendTaskName] = window[globalSendTaskName] || model.get('sendHitTask');
-        // Replace {{collectorEndpoint}}
         var endpoint = "https://{{collectorEndpoint}}/collector/namespace/com.google.analytics.v1/name/Hit";
-
 	    model.set('sendHitTask', function(sendModel) {
-            var payload = sendModel.get('hitPayload');
-            var body = {};
-            body['payload'] = payload;
             try{
                 originalSendHitTask(sendModel);
             }catch(e){
-                console.log("error on payload");
                 console.log(e);
             }          	
-            if(!navigator.sendBeacon(endpoint, JSON.stringify(body))){
+            if(!navigator.sendBeacon(endpoint, sendModel.get('hitPayload'))){
                 var beacon = document.createElement("img");
-                beacon.src = endpoint + '?' + payload;
+                beacon.src = endpoint + '?' + sendModel.get('hitPayload');
             }
 		});
 	};
